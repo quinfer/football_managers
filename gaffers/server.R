@@ -1,8 +1,8 @@
 # Define server logic for timeline
 server <- function(input, output,session,server) {
   
-updateSelectizeInput(session,'managers',choices=managers,server=TRUE,selected = "Alex Ferguson")
-updateSelectizeInput(session,'teams',choices=teams,server=TRUE, selected = "Man Utd")
+updateSelectizeInput(session,'managers',choices=managers,server=TRUE)
+updateSelectizeInput(session,'teams',choices=teams,server=TRUE)
 #   observe({
 #   updateSelectizeInput(session,'teams',choices=teams,server=TRUE
 #                        , options = list(render = I(
@@ -25,19 +25,19 @@ updateSelectizeInput(session,'teams',choices=teams,server=TRUE, selected = "Man 
 # })
   selected_dat<- reactive({
     if (input$type == 'Team') {
-      mgrs %>%
-        filter(grepl(pattern=input$teams,TEAM)) %>%
+      prem_mgrs %>%
+        filter(grepl(pattern=input$teams,Club)) %>%
         mutate(event=Manager,
-               start=from,
-               end=to,
-               group=TEAM)
+               start=Start,
+               end=Finish,
+               group=Club)
     } else {
-      mgrs %>%
+      prem_mgrs %>%
         filter(grepl(pattern =input$managers,Manager)) %>%
-        mutate(event=TEAM,
-               start=from,
-               end=to,
-               group=Manager)
+        mutate(event=Manager,
+               start=Start,
+               end=Finish,
+               group=Club)
     }
   })
   
@@ -46,11 +46,8 @@ updateSelectizeInput(session,'teams',choices=teams,server=TRUE, selected = "Man 
     hc_vistime(dat, col.event = "event", col.group = "group")
   })
 
-  output$table <- DT::renderDataTable({
-    out <- selected_dat() %>%
-      select(Manager,TEAM,FROM,TO,WON,DRAWN,LOST)
-    out <- as_tibble(out)
-    
+  output$table_mgrs <- DT::renderDataTable({
+    prem_mgrs %>%
     DT::datatable(
       rownames = FALSE,
       extensions = "Buttons",
@@ -61,6 +58,17 @@ updateSelectizeInput(session,'teams',choices=teams,server=TRUE, selected = "Man 
         scrollX = TRUE
       ))
   })
+  output$table_matchs <- DT::renderDataTable({
+    prem %>%
+      DT::datatable(
+        rownames = FALSE,
+        extensions = "Buttons",
+        options = list(
+          dom= "Btp",
+          buttons = list("excel", "csv"),
+          ordering = FALSE,
+          scrollX = TRUE
+        ))
+  })
 
-    
-}
+    }
