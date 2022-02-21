@@ -1,9 +1,6 @@
 # Define server logic for timeline
 server <- function(input, output,session,server) {
   
-updateSelectizeInput(session,'managers',choices=managers,server=TRUE)
-updateSelectizeInput(session,'teams',choices=teams,server=TRUE)
-#   observe({
 #   updateSelectizeInput(session,'teams',choices=teams,server=TRUE
 #                        , options = list(render = I(
 #     '{
@@ -24,7 +21,7 @@ updateSelectizeInput(session,'teams',choices=teams,server=TRUE)
 #                        )))
 # })
   selected_dat<- reactive({
-    if (input$type == 'Team') {
+    if (!is.na(input$teams)) {
       prem_mgrs %>%
         filter(grepl(pattern=input$teams,Club)) %>%
         mutate(event=Manager,
